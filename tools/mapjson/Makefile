@@ -1,6 +1,6 @@
 CXX ?= g++
 
-CXXFLAGS := -Wall -std=c++11 -O2 --static
+CXXFLAGS := -Wall -std=c++11 -O2
 
 SRCS := json11.cpp mapjson.cpp
 
@@ -10,6 +10,12 @@ ifeq ($(OS),Windows_NT)
 EXE := .exe
 else
 EXE :=
+endif
+
+ifeq (Darwin,$(findstring Darwin,$(shell uname)))
+	CXXFLAGS +=
+else
+	CXXFLAGS += --static
 endif
 
 .PHONY: all clean
