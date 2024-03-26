@@ -132,6 +132,7 @@ static void ShowHelpBar(const u8 *string);
 
 // .rodata
 static const u16 gBGPals[] = INCBIN_U16("graphics/pokegear/bg.gbapal");
+static const u16 gBGGirlPals[] = INCBIN_U16("graphics/pokegear/bg_girl.gbapal");
 static const u16 sMenuSpritesPalette[] = INCBIN_U16("graphics/pokegear/menu_sprites.gbapal");
 static const u32 gMainTiles[] = INCBIN_U32("graphics/pokegear/main.4bpp.lz");
 static const u8 sDigitTiles[] = INCBIN_U8("graphics/pokegear/digits.4bpp");
@@ -605,7 +606,12 @@ void CB2_InitPokegear(void)
     DmaClear16(3, (void *)PLTT, PLTT_SIZE);
     LZ77UnCompVram(gMainTiles, (void *)(VRAM + 0x0000));
     LZ77UnCompVram(gPokegear_GridMap, (void *)(VRAM + 0xC800));
-    LoadPalette(gBGPals, 0, sizeof(gBGPals));
+    if (gSaveBlock2Ptr->playerGender == FEMALE){
+        LoadPalette(gBGGirlPals, 0, sizeof(gBGPals));
+    }
+    else{
+        LoadPalette(gBGPals, 0, sizeof(gBGPals));
+    }
     LoadPalette(GetTextWindowPalette(2), 0xB0, 0x20);
     ResetBgsAndClearDma3BusyFlags(0);
     InitBgsFromTemplates(0, sBgTemplates, ARRAY_COUNT(sBgTemplates));
@@ -881,11 +887,13 @@ static void Task_Pokegear3(u8 taskId)
             PlaySE(SE_POKENAV_OFF);
             return;
         }
-        else if (JOY_NEW(START_BUTTON))
+        else if (JOY_NEW(START_BUTTON)
+            || (JOY_NEW(L_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_LR))
         {
             newCard = ChangeCardWithDelta(-1, sPokegearStruct.currentCard);
         }
-        else if (JOY_NEW(SELECT_BUTTON))
+        else if (JOY_NEW(SELECT_BUTTON)
+            || (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_LR))
         {
             newCard = ChangeCardWithDelta(1, sPokegearStruct.currentCard);
         }
@@ -953,11 +961,13 @@ static void Task_SwapCards(u8 taskId)
     s16 *data = gTasks[taskId].data;
     u8 newCard = tNewCard;
 
-    if (JOY_NEW(START_BUTTON))
+    if (JOY_NEW(START_BUTTON)
+            || (JOY_NEW(L_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_LR))
     {
         newCard = ChangeCardWithDelta(-1, tNewCard);
     }
-    else if (JOY_NEW(SELECT_BUTTON))
+    else if (JOY_NEW(SELECT_BUTTON)
+            || (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_LR))
     {
         newCard = ChangeCardWithDelta(1, tNewCard);
     }
